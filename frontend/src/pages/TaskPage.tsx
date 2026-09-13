@@ -155,7 +155,7 @@ export default function TaskPage() {
               {result && (
                 <>
                   <p className="muted">Model: {result.model}</p>
-                  <ResultViewer result={result} />
+                  <ResultViewer result={result} sourceImageUrl={previewUrl} />
                 </>
               )}
             </div>

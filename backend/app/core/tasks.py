@@ -11,9 +11,13 @@ experimental: True means the task is not reliably available on HF's free
               serverless Inference API and typically needs a dedicated
               Inference Endpoint / Space — the UI will show a warning
               and let the user supply their own model_id / endpoint.
+space_host / space_api_name: when set, this task is served by a public
+              Hugging Face Space's Gradio API instead of the serverless
+              Inference API (used as a free fallback for tasks with no
+              working hf-inference model). See app/core/space_client.py.
 """
 
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 
 class TaskDef(TypedDict):
@@ -25,6 +29,10 @@ class TaskDef(TypedDict):
     input_type: str
     output_type: str
     experimental: bool
+    space_host: NotRequired[str]
+    space_api_name: NotRequired[str]
+    space_protocol: NotRequired[str]  # "classic" (Gradio v3) or "queue" (Gradio v4+)
+    space_fn_index: NotRequired[int]
 
 
 TASKS: list[TaskDef] = [
@@ -36,7 +44,9 @@ TASKS: list[TaskDef] = [
         "default_model": "Intel/dpt-hybrid-midas",
         "input_type": "image",
         "output_type": "image",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "nielsr-dpt-depth-estimation.hf.space",
+        "space_api_name": "predict",
     },
     {
         "id": "image-classification",
@@ -53,10 +63,12 @@ TASKS: list[TaskDef] = [
         "label": "Image Feature Extraction",
         "category": "Computer Vision",
         "description": "Turn an image into a dense embedding vector.",
-        "default_model": "google/vit-base-patch16-224",
+        "default_model": "nomic-ai/nomic-embed-vision-v1.5",
         "input_type": "image",
         "output_type": "json",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "rrg92-image-embeddings.hf.space",
+        "space_api_name": "ImgEmbed",
     },
     {
         "id": "image-segmentation",
@@ -76,17 +88,21 @@ TASKS: list[TaskDef] = [
         "default_model": "timbrooks/instruct-pix2pix",
         "input_type": "image_text",
         "output_type": "image",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "timbrooks-instruct-pix2pix.hf.space",
+        "space_api_name": "generate",
     },
     {
         "id": "image-to-text",
         "label": "Image-to-Text",
         "category": "Computer Vision",
         "description": "Generate a caption describing an image.",
-        "default_model": "Salesforce/blip-image-captioning-base",
+        "default_model": "microsoft/git-large-coco",
         "input_type": "image",
         "output_type": "text",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "hysts-image-captioning-with-git.hf.space",
+        "space_api_name": "caption",
     },
     {
         "id": "image-to-video",
@@ -102,21 +118,26 @@ TASKS: list[TaskDef] = [
         "id": "keypoint-detection",
         "label": "Keypoint Detection",
         "category": "Computer Vision",
-        "description": "Locate skeletal/landmark keypoints in an image.",
+        "description": "Locate skeletal/landmark keypoints in an image (works best on photos of people).",
         "default_model": "usyd-community/vitpose-base-simple",
         "input_type": "image",
-        "output_type": "json",
-        "experimental": True,
+        "output_type": "image",
+        "experimental": False,
+        "space_host": "hysts-vitpose-transformers.hf.space",
+        "space_api_name": "detect_pose_image",
     },
     {
         "id": "mask-generation",
         "label": "Mask Generation",
         "category": "Computer Vision",
         "description": "Generate object masks (Segment Anything style).",
-        "default_model": "facebook/sam-vit-base",
+        "default_model": "facebook/sam2-hiera-tiny",
         "input_type": "image",
-        "output_type": "json",
-        "experimental": True,
+        "output_type": "image",
+        "experimental": False,
+        "space_host": "skalskip-segment-anything-model-2.hf.space",
+        "space_protocol": "queue",
+        "space_fn_index": 1,
     },
     {
         "id": "object-detection",
@@ -132,11 +153,14 @@ TASKS: list[TaskDef] = [
         "id": "video-classification",
         "label": "Video Classification",
         "category": "Computer Vision",
-        "description": "Classify the action/content of a short video.",
-        "default_model": "MCG-NJU/videomae-base-finetuned-kinetics",
+        "description": "Classify the action/content of a short video (best with human-action clips).",
+        "default_model": "custom/har-hmdb51",
         "input_type": "video",
         "output_type": "json",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "johnpinto-human-activity-recognition-har-video-c-03e5d14.hf.space",
+        "space_protocol": "classic",
+        "space_fn_index": 0,
     },
     {
         "id": "text-to-image",
@@ -152,21 +176,26 @@ TASKS: list[TaskDef] = [
         "id": "text-to-video",
         "label": "Text-to-Video",
         "category": "Computer Vision",
-        "description": "Generate a short video from a text prompt.",
-        "default_model": "damo-vilab/text-to-video-ms-1.7b",
+        "description": "Generate a short animated video from a text prompt (fast, distilled AnimateDiff).",
+        "default_model": "ByteDance/AnimateDiff-Lightning",
         "input_type": "text",
-        "output_type": "image",
-        "experimental": True,
+        "output_type": "video",
+        "experimental": False,
+        "space_host": "bytedance-animatediff-lightning.hf.space",
+        "space_protocol": "queue_text",
+        "space_fn_index": 0,
     },
     {
         "id": "unconditional-image-generation",
         "label": "Unconditional Image Generation",
         "category": "Computer Vision",
-        "description": "Generate an image with no input (pure sampling).",
-        "default_model": "google/ddpm-celebahq-256",
+        "description": "Generate an image with no input (pure sampling of a latent diffusion model).",
+        "default_model": "CompVis/ldm-celebahq-256",
         "input_type": "none",
         "output_type": "image",
-        "experimental": True,
+        "experimental": False,
+        "space_host": "keysun89-this-person-does-not-exist-ldm.hf.space",
+        "space_api_name": "generate_single_image",
     },
     {
         "id": "video-to-video",
@@ -182,21 +211,32 @@ TASKS: list[TaskDef] = [
         "id": "zero-shot-image-classification",
         "label": "Zero-Shot Image Classification",
         "category": "Computer Vision",
-        "description": "Classify an image against labels you supply on the fly.",
-        "default_model": "openai/clip-vit-base-patch32",
+        "description": (
+            "Classify an image against labels you supply on the fly. No CLIP-based "
+            "classification Space currently runs reliably free, so this reuses the "
+            "zero-shot detector as a proxy: each label is checked against the whole "
+            "image and shown with a confidence box."
+        ),
+        "default_model": "IDEA-Research/grounding-dino-tiny",
         "input_type": "image_text",
-        "output_type": "json",
-        "experimental": True,
+        "output_type": "image",
+        "experimental": False,
+        "space_host": "merve-grounding-dino-demo.hf.space",
+        "space_protocol": "classic",
+        "space_fn_index": 0,
     },
     {
         "id": "zero-shot-object-detection",
         "label": "Zero-Shot Object Detection",
         "category": "Computer Vision",
         "description": "Detect objects matching labels you supply on the fly.",
-        "default_model": "google/owlvit-base-patch32",
+        "default_model": "IDEA-Research/grounding-dino-tiny",
         "input_type": "image_text",
-        "output_type": "json",
-        "experimental": True,
+        "output_type": "image",
+        "experimental": False,
+        "space_host": "merve-grounding-dino-demo.hf.space",
+        "space_protocol": "classic",
+        "space_fn_index": 0,
     },
     {
         "id": "text-to-3d",

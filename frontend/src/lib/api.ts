@@ -46,7 +46,13 @@ export async function runInference(
   if (fields.candidateLabels) form.append("candidate_labels", fields.candidateLabels);
   if (fields.modelId) form.append("model_id", fields.modelId);
 
-  const res = await fetch(`/api/infer/${taskId}`, { method: "POST", body: form });
+  // An empty FormData still sends a multipart body with zero parts, which
+  // FastAPI's parser rejects outright — send no body at all in that case.
+  const hasFields = Array.from(form.keys()).length > 0;
+  const res = await fetch(`/api/infer/${taskId}`, {
+    method: "POST",
+    body: hasFields ? form : undefined,
+  });
   const body = await res.json();
   if (!res.ok) throw new Error(body.detail || "Inference failed");
   return body;

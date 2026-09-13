@@ -1,6 +1,21 @@
+import BoundingBoxViewer from "./BoundingBoxViewer";
 import type { InferResult } from "../lib/api";
 
-export default function ResultViewer({ result }: { result: InferResult }) {
+function isDetectionArray(data: unknown): data is { score: number; label: string; box: unknown }[] {
+  return (
+    Array.isArray(data) &&
+    data.length > 0 &&
+    data.every((d) => d && typeof d === "object" && "box" in d && "label" in d)
+  );
+}
+
+export default function ResultViewer({
+  result,
+  sourceImageUrl,
+}: {
+  result: InferResult;
+  sourceImageUrl?: string | null;
+}) {
   const { type, data } = result.result;
 
   if (type === "image") {
@@ -15,6 +30,10 @@ export default function ResultViewer({ result }: { result: InferResult }) {
 
   if (type === "text") {
     return <pre className="result-text">{String(data)}</pre>;
+  }
+
+  if (type === "json" && sourceImageUrl && isDetectionArray(data)) {
+    return <BoundingBoxViewer imageUrl={sourceImageUrl} detections={data} />;
   }
 
   return <pre className="result-json">{JSON.stringify(data, null, 2)}</pre>;
