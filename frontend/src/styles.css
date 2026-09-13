@@ -26,6 +26,62 @@ body {
   max-width: 1100px;
   margin: 0 auto;
   padding: 32px 24px 64px;
+  position: relative;
+}
+
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.3;
+  z-index: -1;
+  pointer-events: none;
+  animation: orbFloat 24s ease-in-out infinite;
+}
+
+.bg-orb-1 {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, #4f8cff, transparent 70%);
+  top: -120px;
+  left: -120px;
+  animation-duration: 22s;
+}
+
+.bg-orb-2 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, #8f7cff, transparent 70%);
+  bottom: -140px;
+  right: -100px;
+  animation-duration: 27s;
+  animation-delay: -6s;
+}
+
+.bg-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #3ddc97, transparent 70%);
+  top: 45%;
+  right: 8%;
+  animation-duration: 31s;
+  animation-delay: -12s;
+}
+
+@keyframes orbFloat {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(50px, -40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb {
+    animation: none;
+  }
 }
 
 .hero h1 {
@@ -56,7 +112,30 @@ body {
   gap: 14px;
 }
 
-.task-card {
+.tilt-card {
+  position: relative;
+  height: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  transition: opacity 0.2s;
+  z-index: 2;
+}
+
+.tilt-content {
+  height: 100%;
+}
+
+.task-card-inner {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -65,14 +144,124 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 18px 16px;
-  text-decoration: none;
   color: var(--text);
-  transition: border-color 0.15s, transform 0.15s;
+  height: 100%;
+  transition: border-color 0.15s, box-shadow 0.2s;
 }
 
-.task-card:hover {
+.tilt-card:hover .task-card-inner {
   border-color: var(--accent);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(79, 140, 255, 0.35);
+}
+
+.entrance {
+  opacity: 0;
+  animation: cardEntrance 0.5s ease forwards;
+}
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrance {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* 3D carousel */
+.carousel3d-scene {
+  position: relative;
+  height: 260px;
+  margin: 8px 0 40px;
+  perspective: 1300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel3d-stage {
+  position: relative;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.carousel3d-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190px;
+  height: 140px;
+  margin-left: -95px;
+  margin-top: -70px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  backface-visibility: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.carousel3d-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 40px -5px rgba(79, 140, 255, 0.45);
+}
+
+.carousel3d-icon {
+  font-size: 2.4rem;
+}
+
+.carousel3d-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.carousel3d-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel3d-nav:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.carousel3d-nav-left {
+  left: 4px;
+}
+
+.carousel3d-nav-right {
+  right: 4px;
 }
 
 .task-icon {
@@ -102,12 +291,20 @@ body {
   top: 12px;
   right: 12px;
   font-size: 0.65rem;
-  color: var(--warn);
-  background: var(--warn-soft);
   padding: 2px 8px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.badge-experimental {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.badge-live {
+  color: #3ddc97;
+  background: rgba(61, 220, 151, 0.12);
 }
 
 .back-link {
@@ -253,6 +450,22 @@ body {
 .muted {
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.bbox-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.bbox-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .result-image {
