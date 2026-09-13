@@ -1,7 +1,13 @@
 import BoundingBoxViewer from "./BoundingBoxViewer";
 import type { InferResult } from "../lib/api";
 
-function isDetectionArray(data: unknown): data is { score: number; label: string; box: unknown }[] {
+type Detection = {
+  score: number;
+  label: string;
+  box: { xmin: number; ymin: number; xmax: number; ymax: number };
+};
+
+function isDetectionArray(data: unknown): data is Detection[] {
   return (
     Array.isArray(data) &&
     data.length > 0 &&
