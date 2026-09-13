@@ -2,6 +2,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 import base64
 import json
+from typing import Optional
 
 from app.core.hf_client import HFInferenceError, query_binary, query_image_with_text, query_json
 from app.core.space_client import (
@@ -22,10 +23,10 @@ router = APIRouter(prefix="/api/infer", tags=["infer"])
 @router.post("/{task_id}")
 async def run_inference(
     task_id: str,
-    file: UploadFile | None = File(default=None),
-    prompt: str | None = Form(default=None),
-    candidate_labels: str | None = Form(default=None),
-    model_id: str | None = Form(default=None),
+    file: Optional[UploadFile] = File(default=None),
+    prompt: Optional[str] = Form(default=None),
+    candidate_labels: Optional[str] = Form(default=None),
+    model_id: Optional[str] = Form(default=None),
 ):
     task = TASKS_BY_ID.get(task_id)
     if not task:

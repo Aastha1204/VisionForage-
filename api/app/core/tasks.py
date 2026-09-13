@@ -17,22 +17,10 @@ space_host / space_api_name: when set, this task is served by a public
               working hf-inference model). See app/core/space_client.py.
 """
 
-from typing import NotRequired, TypedDict
-
-
-class TaskDef(TypedDict):
-    id: str
-    label: str
-    category: str
-    description: str
-    default_model: str
-    input_type: str
-    output_type: str
-    experimental: bool
-    space_host: NotRequired[str]
-    space_api_name: NotRequired[str]
-    space_protocol: NotRequired[str]  # "classic" (Gradio v3) or "queue" (Gradio v4+)
-    space_fn_index: NotRequired[int]
+# Plain dict, not TypedDict: `NotRequired` needs Python 3.11+, and the
+# serverless runtime's exact Python version isn't guaranteed. The shape is
+# documented above and in the docstring instead of enforced at type-check time.
+TaskDef = dict
 
 
 TASKS: list[TaskDef] = [

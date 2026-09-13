@@ -9,6 +9,7 @@ of the 19 task categories with one shared code path.
 
 import base64
 import json
+from typing import Optional
 
 import requests
 
@@ -22,7 +23,7 @@ class HFInferenceError(Exception):
         super().__init__(message)
 
 
-def _headers(extra: dict | None = None) -> dict:
+def _headers(extra: Optional[dict] = None) -> dict:
     headers = {}
     if HF_TOKEN:
         headers["Authorization"] = f"Bearer {HF_TOKEN}"
@@ -35,7 +36,7 @@ def query_binary(
     model_id: str,
     binary_data: bytes,
     content_type: str = "application/octet-stream",
-    params: dict | None = None,
+    params: Optional[dict] = None,
 ) -> dict:
     """Send raw bytes (image/video) to a model, optionally with extra JSON params
     packed into the X-Wait-For-Model / query string per HF conventions."""

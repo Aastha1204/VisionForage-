@@ -10,7 +10,7 @@ separately via `fetch_space_file`.
 import base64
 import json
 import uuid
-from typing import Callable
+from typing import Callable, Optional
 
 import requests
 
@@ -58,7 +58,7 @@ def _call_space_sse(space_host: str, api_name: str, data: list) -> list:
     raise SpaceInferenceError("Space stream ended without a result")
 
 
-def _call_space_with_image(space_host: str, api_name: str, image_bytes: bytes, extra_args: list | None = None) -> list:
+def _call_space_with_image(space_host: str, api_name: str, image_bytes: bytes, extra_args: Optional[list] = None) -> list:
     b64 = base64.b64encode(image_bytes).decode("utf-8")
     data = [{"url": f"data:image/jpeg;base64,{b64}", "meta": {"_type": "gradio.FileData"}}, *(extra_args or [])]
     return _call_space_sse(space_host, api_name, data)
@@ -184,7 +184,7 @@ def query_space_image_output(
     space_host: str,
     api_name: str,
     image_bytes: bytes,
-    extra_args: list | None = None,
+    extra_args: Optional[list] = None,
     output_index: int = 0,
 ) -> str:
     """For Spaces whose named API returns an image file among its outputs.
